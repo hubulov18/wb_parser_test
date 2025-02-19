@@ -26,4 +26,4 @@ $ npm run start:prod
 $ docker compose up
 
 ```
-
+Необходимо добавить credentials.json в корень проекта чтобы можно было работать с гугл таблицами
