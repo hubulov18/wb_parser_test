@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: node_app
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      API_KEY: ${API_KEY}
+      TABLE_LINKS: ${TABLE_LINKS}
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      PGPORT: 5432
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["/bin/sh", "-c", "npx knex migrate:latest && npm run start"]
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
